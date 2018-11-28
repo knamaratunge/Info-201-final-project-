@@ -30,6 +30,8 @@ data <- fromJSON(content)
 businesses <- data$businesses
 
 us_citites <- us.cities
+top_cities <- arrange(us_citites, desc(pop)) %>% slice(1:5)
+
 
 
 # Define server logic required to draw a histogram
