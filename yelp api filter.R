@@ -10,7 +10,7 @@ id <- "e6EqQUv9rODp67CGhfDoBg"
 
 
 
-params <- list(  location = "Seattle", limit = 50)
+params <- list(  location = "98115", limit = 50)
 response <- GET("https://api.yelp.com/v3/businesses/search", 
                 add_headers('Authorization' = paste("Bearer", yelp_key)), 
                 query = params)
@@ -18,3 +18,5 @@ content <- content(response, 'text')
 data <- fromJSON(content)
 
 businesses <- data$businesses
+
+us_citites <- us.cities
