@@ -29,8 +29,10 @@ data <- fromJSON(content)
 
 businesses <- data$businesses
 
+##top 5 most populated cityz
 us_citites <- us.cities
-top_cities <- arrange(us_citites, desc(pop)) %>% slice(1:5)
+top_cities <- arrange(us_citites, desc(pop)) %>% slice(1:5) %>% select(name) 
+city_list <- as.list(as.data.frame(t(top_cities)))
 
 
 
