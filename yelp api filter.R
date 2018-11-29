@@ -20,3 +20,7 @@ data <- fromJSON(content)
 businesses <- data$businesses
 
 us_citites <- us.cities
+
+
+
+

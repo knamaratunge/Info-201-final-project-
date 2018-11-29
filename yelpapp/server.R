@@ -18,16 +18,17 @@ library(jsonlite)
 yelp_key <- "WIZ9vy0AqeqYf_pxMOmBFcSLnhhF4iZmgdlSdK2E3FOM7Zb8X3naitCp58p1pZIGypOIhi1Tdv020jQGNxHsmgv7D1I1cu3h_7cZkbvDqGGN3V7QZ3mSd4cTCXf8W3Yx"
 id <- "e6EqQUv9rODp67CGhfDoBg"
 
+get_business_list <-function(city_name) {
+  params <- list(  location = city_name, limit = 50)
+  response <- GET("https://api.yelp.com/v3/businesses/search", 
+                  add_headers('Authorization' = paste("Bearer", yelp_key)), 
+                  query = params)
+  content <- content(response, 'text')
+  data <- fromJSON(content)
+  return(data$businesses)
+}
 
 
-params <- list(  location = "98115", limit = 50)
-response <- GET("https://api.yelp.com/v3/businesses/search", 
-                add_headers('Authorization' = paste("Bearer", yelp_key)), 
-                query = params)
-content <- content(response, 'text')
-data <- fromJSON(content)
-
-businesses <- data$businesses
 
 ##top 5 most populated cityz
 us_citites <- us.cities
@@ -35,21 +36,41 @@ top_cities <- arrange(us_citites, desc(pop)) %>% slice(1:5) %>% select(name)
 city_list <- as.list(as.data.frame(t(top_cities)))
 citiez <- unlist(top_cities)
 num_list <- 1:5
-names(num_list) <- citiez
+names(citiez) <- citiez
+
+
 
 
 # Define server logic required to draw a histogram
 shinyServer(function(input, output) {
    
-  output$distPlot <- renderPlot({
-    
-    # generate bins based on input$bins from ui.R
-    x    <- faithful[, 2] 
-    bins <- seq(min(x), max(x), length.out = input$bins + 1)
-    
-    # draw the histogram with the specified number of bins
-    hist(x, breaks = bins, col = 'darkgray', border = 'white')
+  
+  table_data <- reactive({
+    businesses <- get_business_list(input$cities)
+    top_ten <- head(businesses,n=10)
+    top_ten <- flatten(top_ten)
+    select(top_ten, name, rating, review_count, price, location.address1)
     
   })
+  
+  output$table <- renderTable({
+    table_data()
+  })
+  
+  output$map <- renderPlot({
+    businesses <- get_business_list(input$cities)
+    top_ten <- head(businesses,n=10)
+    top_ten <- flatten(top_ten)
+    
+    states <- map_data("state")
+    ggplot() + 
+      coord_fixed(1.3) +
+      guides(fill=FALSE) +
+      geom_point(data = top_ten, mapping = aes(x = coordinates.longitude, y = coordinates.latitude), 
+                 color = "green" , size = 1) +
+      labs(x = "Longitude", y = "Latitude", title = "Business Map")
+    
+  })
+  
   
 })
