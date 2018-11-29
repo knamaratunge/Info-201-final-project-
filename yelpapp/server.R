@@ -33,7 +33,9 @@ businesses <- data$businesses
 us_citites <- us.cities
 top_cities <- arrange(us_citites, desc(pop)) %>% slice(1:5) %>% select(name) 
 city_list <- as.list(as.data.frame(t(top_cities)))
-
+citiez <- unlist(top_cities)
+num_list <- 1:5
+names(num_list) <- citiez
 
 
 # Define server logic required to draw a histogram
