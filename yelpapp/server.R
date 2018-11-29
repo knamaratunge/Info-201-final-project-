@@ -33,10 +33,8 @@ get_business_list <-function(city_name) {
 ##top 5 most populated cityz
 us_citites <- us.cities
 top_cities <- arrange(us_citites, desc(pop)) %>% slice(1:5) %>% select(name) 
-city_list <- as.list(as.data.frame(t(top_cities)))
-citiez <- unlist(top_cities)
-num_list <- 1:5
-names(citiez) <- citiez
+cities <- unlist(top_cities)
+names(cities) <- cities
 
 
 
