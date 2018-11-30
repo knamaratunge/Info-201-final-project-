@@ -28,6 +28,16 @@ get_business_list <-function(city_name) {
   return(data$businesses)
 }
 
+get_business_details <-function(id) {
+  ##params <- list( id = id)
+  response <- GET(paste0("https://api.yelp.com/v3/businesses/", id), 
+                  add_headers('Authorization' = paste("Bearer", yelp_key))) 
+                  ##query = params)
+  content <- content(response, 'text')
+  data <- fromJSON(content)
+  details <- data.frame(matrix(unlist(data)))
+  return(details)
+}
 
 
 ##top 5 most populated cityz
@@ -70,5 +80,20 @@ shinyServer(function(input, output) {
     
   })
   
+  random_data <- reactive({
+    businesses <- get_business_list(input$cities)
+    random_num <- sample(1:50,1,replace=T)
+    businesses <- get_business_list(input$cities)
+    id <- businesses[random_num, 1]
+    details <- get_business_details(id)
+    ##details <- flatten(details)
+    
+  })
+  
+  output$random_table <- renderTable({
+    random_data()
+  })
+  
   
 })
+
