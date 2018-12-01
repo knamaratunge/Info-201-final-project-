@@ -20,7 +20,7 @@ shinyUI(fluidPage(
   sidebarLayout(
     sidebarPanel(
        
-       textInput("cities", label = h3("Enter your desired city and state: (ex: Seattle, WA)"))
+       textInput("cities", label = h3("Enter your desired city and state: (ex: Seattle, WA)"), value = "Seattle")
           
     ),
     
