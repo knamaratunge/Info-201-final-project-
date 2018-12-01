@@ -40,12 +40,6 @@ get_business_details <-function(id) {
   return(details)
 }
 
-
-
-getCityData <- reactive({
-  
-  
-})
 ##top 5 most populated cityz
 ##us_citites <- us.cities
 ##top_cities <- arrange(us_citites, desc(pop)) %>% slice(1:5) %>% select(name) 
@@ -60,13 +54,10 @@ shinyServer(function(input, output) {
    
   
   table_data <- reactive({
-    if(is.null(input$cities)) {
-      return(get_business_list("Seattle, WA"))
-    }
     businesses <- get_business_list(input$cities)
     top_ten <- head(businesses,n=10)
     top_ten <- flatten(top_ten)
-    select(top_ten, name, rating, review_count, price, location.address1)
+    select(top_ten, name, rating, review_count, price, location.address1) 
     
   })
   
@@ -76,21 +67,34 @@ shinyServer(function(input, output) {
   
   output$map <- renderPlot({
     businesses <- get_business_list(input$cities)
-    top_ten <- head(businesses,n=10)
-    top_ten <- flatten(top_ten)
+    top_ten <- head(businesses,n=10) 
+    top_ten <- flatten(top_ten) %>% mutate(lower_state_name = tolower(state.name[match(location.state, state.abb)]))
+    print(top_ten)
+    states <- map_data("state") %>% filter(region == top_ten$lower_state_name)
+    ##states <- filter(states, tolower(state.name[match(top_ten$location.state, state.abb)] == states$region))
+    ##state.abb[match(x,state.name)]
     
-    states <- map_data("state")
-    ggplot() + 
+    without_lim_map <- 
+      ggplot() + 
+      geom_polygon(data = states, aes(x = long, y = lat, fill = region, group = group), 
+                   color = "white", fill = "grey") + 
       coord_fixed(1.3) +
       guides(fill=FALSE) +
       geom_point(data = top_ten, mapping = aes(x = coordinates.longitude, y = coordinates.latitude), 
                  color = "green" , size = 1) +
       labs(x = "Longitude", y = "Latitude", title = "Business Map")
+      ##scale_x_continuous(limits = c(min(top_ten$coordinates.longitude), max(top_ten$coordinates.longitude))) +
+     ## scale_y_continuous(limits = c(min(top_ten$coordinates.latitude), max(top_ten$coordinates.latitude)))
+    
+    limited_map <- 
+      without_lim_map +       
+      scale_x_continuous(limits = c(min(top_ten$coordinates.longitude), max(top_ten$coordinates.longitude))) +
+      scale_y_continuous(limits = c(min(top_ten$coordinates.latitude), max(top_ten$coordinates.latitude)))
+    limited_map
     
   })
   
   random_data <- reactive({
-    businesses <- get_business_list(input$cities)
     random_num <- sample(1:50,1,replace=T)
     businesses <- get_business_list(input$cities)
     id <- businesses[random_num, 1]
@@ -102,6 +106,7 @@ shinyServer(function(input, output) {
   output$random_table <- renderTable({
     random_data()
   })
+  
   
   
 })
