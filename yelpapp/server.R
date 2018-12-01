@@ -12,7 +12,8 @@ library(tidyr)
 library(dplyr)
 library(httr)
 library(jsonlite)
-
+library(maps)
+library(ggplot2)
 
 
 yelp_key <- "WIZ9vy0AqeqYf_pxMOmBFcSLnhhF4iZmgdlSdK2E3FOM7Zb8X3naitCp58p1pZIGypOIhi1Tdv020jQGNxHsmgv7D1I1cu3h_7cZkbvDqGGN3V7QZ3mSd4cTCXf8W3Yx"
@@ -40,11 +41,16 @@ get_business_details <-function(id) {
 }
 
 
+
+getCityData <- reactive({
+  
+  
+})
 ##top 5 most populated cityz
-us_citites <- us.cities
-top_cities <- arrange(us_citites, desc(pop)) %>% slice(1:5) %>% select(name) 
-cities <- unlist(top_cities)
-names(cities) <- cities
+##us_citites <- us.cities
+##top_cities <- arrange(us_citites, desc(pop)) %>% slice(1:5) %>% select(name) 
+##cities <- unlist(top_cities)
+##names(cities) <- cities
 
 
 
@@ -54,6 +60,9 @@ shinyServer(function(input, output) {
    
   
   table_data <- reactive({
+    if(is.null(input$cities)) {
+      return(get_business_list("Seattle, WA"))
+    }
     businesses <- get_business_list(input$cities)
     top_ten <- head(businesses,n=10)
     top_ten <- flatten(top_ten)
