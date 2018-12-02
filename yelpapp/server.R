@@ -14,6 +14,7 @@ library(httr)
 library(jsonlite)
 library(maps)
 library(ggplot2)
+library(plyr)
 
 
 yelp_key <- "WIZ9vy0AqeqYf_pxMOmBFcSLnhhF4iZmgdlSdK2E3FOM7Zb8X3naitCp58p1pZIGypOIhi1Tdv020jQGNxHsmgv7D1I1cu3h_7cZkbvDqGGN3V7QZ3mSd4cTCXf8W3Yx"
@@ -36,8 +37,9 @@ get_business_details <-function(id) {
                   ##query = params)
   content <- content(response, 'text')
   data <- fromJSON(content)
-  details <- data.frame(matrix(unlist(data)))
-  return(details)
+  details <- data.frame(unlist(data))
+  ##names(details) = c("id")
+  
 }
 
 
@@ -90,17 +92,40 @@ shinyServer(function(input, output) {
   })
   
   random_data <- reactive({
-    businesses <- get_business_list(input$cities)
     random_num <- sample(1:50,1,replace=T)
     businesses <- get_business_list(input$cities)
     id <- businesses[random_num, 1]
     details <- get_business_details(id)
-    ##details <- flatten(details)
-    
+    ##details <- flatten(details
+    ran_table <- select(businesses, name, review_count, rating, image_url)
+    sample <- (sample_n(ran_table, size = 1, replace = TRUE))
+    flip <- data.frame("Business info" = c(sample[1,1], sample[1,2], sample[1,3], sample[1,4]))
+    return(flip)
+
   })
   
   output$random_table <- renderTable({
     random_data()
+  })
+  
+  output$picture <- renderText({
+    ran <- random_data()
+      c(
+        '<img src="',ran[4,1] ,
+        '">'
+        
+      )
+  })
+  
+  output$graph <- renderPlot({
+    
+    businesses <- get_business_list(input$cities)
+    categories <- businesses$categories
+    categories <- ldply(categories, data.frame)
+    
+    ggplot() +
+          geom_bar(data = c, mapping = aes(x = title, y = , fill = title )) 
+    
   })
   
   
