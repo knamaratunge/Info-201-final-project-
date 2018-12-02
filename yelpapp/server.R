@@ -14,7 +14,9 @@ library(httr)
 library(jsonlite)
 library(maps)
 library(ggplot2)
+library(ggmap)
 
+register_google(key = "yourkeyhere")
 
 yelp_key <- "WIZ9vy0AqeqYf_pxMOmBFcSLnhhF4iZmgdlSdK2E3FOM7Zb8X3naitCp58p1pZIGypOIhi1Tdv020jQGNxHsmgv7D1I1cu3h_7cZkbvDqGGN3V7QZ3mSd4cTCXf8W3Yx"
 id <- "e6EqQUv9rODp67CGhfDoBg"
@@ -69,29 +71,20 @@ shinyServer(function(input, output) {
     businesses <- get_business_list(input$cities)
     top_ten <- head(businesses,n=10) 
     top_ten <- flatten(top_ten) %>% mutate(lower_state_name = tolower(state.name[match(location.state, state.abb)]))
-    print(top_ten)
-    states <- map_data("state") %>% filter(region == top_ten$lower_state_name)
-    ##states <- filter(states, tolower(state.name[match(top_ten$location.state, state.abb)] == states$region))
-    ##state.abb[match(x,state.name)]
-    
-    without_lim_map <- 
-      ggplot() + 
-      geom_polygon(data = states, aes(x = long, y = lat, fill = region, group = group), 
-                   color = "white", fill = "grey") + 
-      coord_fixed(1.3) +
-      guides(fill=FALSE) +
-      geom_point(data = top_ten, mapping = aes(x = coordinates.longitude, y = coordinates.latitude), 
-                 color = "green" , size = 1) +
-      labs(x = "Longitude", y = "Latitude", title = "Business Map")
-      ##scale_x_continuous(limits = c(min(top_ten$coordinates.longitude), max(top_ten$coordinates.longitude))) +
-     ## scale_y_continuous(limits = c(min(top_ten$coordinates.latitude), max(top_ten$coordinates.latitude)))
-    
-    limited_map <- 
-      without_lim_map +       
-      scale_x_continuous(limits = c(min(top_ten$coordinates.longitude), max(top_ten$coordinates.longitude))) +
-      scale_y_continuous(limits = c(min(top_ten$coordinates.latitude), max(top_ten$coordinates.latitude)))
-    limited_map
-    
+    ##states <- map_data("state") %>% filter(lat >= min(top_ten$coordinates.latitude) - .1 & 
+    ##                                       lat <= max(top_ten$coordinates.latitude) + .1 & 
+    ##                                       long >= min(top_ten$coordinates.longitude) - .1 &
+    ##                                       long <= max(top_ten$coordinates.longitude) +.1)
+
+    city_and_state <- paste0(top_ten[1]$location.city, ",", top_ten[1]$location.state)
+    satellite_map <- get_map(location = c(lon = mean(top_ten$coordinates.longitude), lat = mean(top_ten$coordinates.latitude)), zoom = 10,
+                      maptype = "satellite", scale = 2) ##https://stackoverflow.com/questions/23130604/plot-coordinates-on-map
+    ggmap(satellite_map) + 
+    coord_fixed(1.3) +
+    guides(fill=FALSE) +
+    geom_point(data = top_ten, mapping = aes(x = coordinates.longitude, y = coordinates.latitude), 
+               color = "green" , size = 1) +
+    labs(x = "Longitude", y = "Latitude", title = "Business Map")
   })
   
   random_data <- reactive({
