@@ -102,8 +102,13 @@ shinyServer(function(input, output) {
     categories <- unnest(categories)
     summary <- group_by(categories, title) %>% 
        summarise( n=n())
-    top_categories <- arrange(summary, desc(n)) %>% slice(1:15)  
-    total <- sum(top_categories$n)
+    categorie_table <- arrange(summary, desc(n)) 
+    top_categories <- filter(categorie_table, n > 1) 
+    other_categories <- filter(categorie_table, n <= 1)
+    total <- sum(top_categories$n) + nrow(other_categories)
+    new_row <-data.frame("other", nrow(other_categories))
+    names(new_row)<-c("title","n")
+    top_categories <- rbind(top_categories, new_row)
     top_categories <- top_categories %>% mutate(percent = round((n / total) * 100, 2))
     ##colors <- c('rgb(102,194,165)', 'rgb(252,141,98)', 'rgb(141,160,203)', 'rgb(231,138,195)', 'rgb(166,216,84)', 'rgb(255,217,47)', 'rgb(229,196,148)')
     graph <- plot_ly(top_categories, labels = ~title, values = ~percent, type = "pie",
