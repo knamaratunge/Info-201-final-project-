@@ -36,7 +36,7 @@ shinyUI(fluidPage(
                   
                   tabPanel("Random restaurant", fluid = TRUE,
                            sidebarLayout(
-                             sidebarPanel(actionButton("action", label = "Refresh")),
+                             sidebarPanel(actionButton("action", label = "Generate new random\nrestaurant\n")),
                              mainPanel(fluidRow(tableOutput("random_table")
                              )
                              )

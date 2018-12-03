@@ -75,13 +75,16 @@ shinyServer(function(input, output) {
     column_data <- data.frame("Info" = c(sample[1,1], sample[1,2], sample[1,3], sample[1,4], sample[1,5], sample[1,6]))
     column_category <- data.frame("Business"= c("name:", "count:", "rating:", "price:", "location:", "phone:"))
     final_data <- cbind(column_category, column_data) 
+    random_button()
     return(final_data)  
   }) 
   
   
-  output$random_table <- renderTable({
-    random_data()
-  })
+   output$random_table <- renderTable({
+     ##random_button()
+     random_data()
+     
+   })
   
   output$picture <- renderText({
     ran <- random_data()
@@ -124,6 +127,15 @@ shinyServer(function(input, output) {
     
   })
   
+<<<<<<< HEAD
+=======
+  random_button <- eventReactive(input$action, {
+    
+  })
+  
+  
+  
+>>>>>>> krishann-branch
 })
 
 
