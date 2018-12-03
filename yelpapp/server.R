@@ -15,6 +15,7 @@ library(jsonlite)
 library(maps)
 library(ggplot2)
 library(plotly)
+library(stringr)
 ##library(ggmap)
 ##register_google(key = "yourkeyhere")
 
@@ -74,11 +75,14 @@ shinyServer(function(input, output) {
   
   random_data <- reactive({
     businesses <- get_business_list(input$cities)
-    ran_table <- select(businesses, name, review_count, rating, image_url)
+    businesses <- flatten(businesses)
+    ran_table <- select(businesses, name, review_count, rating, price, location.address1, display_phone)
     sample <- (sample_n(ran_table, size = 1, replace = TRUE))
-    column_data <- data.frame("Business info" = c(sample[1,1], sample[1,2], sample[1,3], sample[1,4]))
-    return(column_data)
-  })
+    column_data <- data.frame("Info" = c(sample[1,1], sample[1,2], sample[1,3], sample[1,4], sample[1,5], sample[1,6]))
+    column_category <- data.frame("Business"= c("name:", "count:", "rating:", "price:", "location:", "phone:"))
+    final_data <- cbind(column_category, column_data) 
+    return(final_data)  
+  }) 
   
   output$random_table <- renderTable({
     random_data()
