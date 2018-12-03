@@ -50,17 +50,20 @@ shinyServer(function(input, output) {
     table_data()
   })
   
-  output$priceHistogram <- renderPlot({
+  output$priceHistogram <- renderPlotly({
     businesses <- get_business_list(input$cities)
     businesses <- businesses %>% flatten() %>% mutate(price_level = nchar(price))
     businesses_no_na <- na.omit(businesses)
     
-    ggplot(businesses_no_na, aes(x=factor(price_level), fill = price_level)) + 
+    histogram <- 
+      ggplot(businesses_no_na, aes(x=factor(price_level), fill = price_level)) + 
       geom_bar(color = "grey", width=.8) + 
       labs(x = "Price Level (Cost per person)") +
       scale_x_discrete(labels = c("Less than $10", "$11-$30", "$31-$60", "More than $60")) + 
       theme_minimal() + 
       guides(fill=FALSE)
+    
+    plotly_histogram <- ggplotly(histogram, tooltip = c("count"))
   })
   
   random_data <- reactive({

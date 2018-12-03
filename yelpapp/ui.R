@@ -29,7 +29,7 @@ shinyUI(fluidPage(
     mainPanel(
       tabsetPanel(type = "tabs",
                   tabPanel("Top 10", tableOutput("table")),
-                  tabPanel("Prices", plotOutput("priceHistogram") ),
+                  tabPanel("Prices", plotlyOutput("priceHistogram") ),
                   
                   tabPanel("Random", fluid = TRUE,
                            sidebarLayout(
