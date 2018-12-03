@@ -31,7 +31,7 @@ shinyUI(fluidPage(
                   tabPanel("Top 10", tableOutput("table")),
                   tabPanel("Map", plotOutput("map") ),
                   tabPanel("Random", tableOutput("random_table"), htmlOutput("picture")),
-                  tabPanel("categories", plotOutput("graph"))
+                  tabPanel("categories",  plotlyOutput("graph"))
                   
       )
     )
