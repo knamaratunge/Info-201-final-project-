@@ -34,19 +34,16 @@ get_business_list <-function(city_name) {
   return(data$businesses)
 }
 
-##top 5 most populated cityz
-##us_citites <- us.cities
-##top_cities <- arrange(us_citites, desc(pop)) %>% slice(1:5) %>% select(name) 
-##cities <- unlist(top_cities)
-##names(cities) <- cities
-
-
 shinyServer(function(input, output) {
    
   table_data <- reactive({
-    businesses <- get_business_list(input$cities) %>% flatten() %>% arrange(desc(rating)) ##makes it by highest rating
-    top_ten <- head(businesses,n=10) 
-    select(top_ten, name, rating, review_count, price, location.address1) 
+    top_ten_businesses <- get_business_list(input$cities) %>% 
+      flatten() %>% 
+      arrange(desc(rating)) %>% ##makes it by highest rating
+      head(businesses,n=10) %>% 
+      select(name, rating, review_count, price, location.address1) 
+    colnames(top_ten_businesses) <- c("Name", "Rating", "Number of reviews", "Price Level", "Address")
+    top_ten_businesses
   })
   
   output$table <- renderTable({
@@ -112,7 +109,6 @@ shinyServer(function(input, output) {
              xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
              yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
 
-    
     # graph <- 
     #   ggplot() +
     #       geom_bar(data = top_categories, mapping = aes(x = title, y = n , fill = n ))
@@ -122,8 +118,6 @@ shinyServer(function(input, output) {
     return(graph)
     
   })
-  
-  
   
 })
 
