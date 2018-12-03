@@ -16,6 +16,7 @@ library(maps)
 library(ggplot2)
 library(plotly)
 library(stringr)
+library(RColorBrewer)
 ##library(ggmap)
 ##register_google(key = "yourkeyhere")
 
@@ -53,24 +54,17 @@ shinyServer(function(input, output) {
     table_data()
   })
   
-  output$map <- renderPlot({
+  output$priceHistogram <- renderPlot({
     businesses <- get_business_list(input$cities)
-    top_ten <- head(businesses,n=10) 
-    top_ten <- flatten(top_ten) %>% mutate(lower_state_name = tolower(state.name[match(location.state, state.abb)]))
-    ##states <- map_data("state") %>% filter(lat >= min(top_ten$coordinates.latitude) - .1 & 
-    ##                                       lat <= max(top_ten$coordinates.latitude) + .1 & 
-    ##                                       long >= min(top_ten$coordinates.longitude) - .1 &
-    ##                                       long <= max(top_ten$coordinates.longitude) +.1)
-
-    city_and_state <- paste0(top_ten[1]$location.city, ",", top_ten[1]$location.state)
-    satellite_map <- get_map(location = c(lon = mean(top_ten$coordinates.longitude), lat = mean(top_ten$coordinates.latitude)), zoom = 10,
-                      maptype = "satellite", scale = 2) ##https://stackoverflow.com/questions/23130604/plot-coordinates-on-map
-    ggmap(satellite_map) + 
-    coord_fixed(1.3) +
-    guides(fill=FALSE) +
-    geom_point(data = top_ten, mapping = aes(x = coordinates.longitude, y = coordinates.latitude), 
-               color = "green" , size = 1) +
-    labs(x = "Longitude", y = "Latitude", title = "Business Map")
+    businesses <- businesses %>% flatten() %>% mutate(price_level = nchar(price))
+    businesses_no_na <- na.omit(businesses)
+    
+    ggplot(businesses_no_na, aes(x=factor(price_level), fill = price_level)) + 
+      geom_bar(color = "grey", width=.8) + 
+      labs(x = "Price Level (Cost per person)") +
+      scale_x_discrete(labels = c("Less than $10", "$11-$30", "$31-$60", "More than $60")) + 
+      theme_minimal() + 
+      guides(fill=FALSE)
   })
   
   random_data <- reactive({
@@ -83,6 +77,7 @@ shinyServer(function(input, output) {
     final_data <- cbind(column_category, column_data) 
     return(final_data)  
   }) 
+  
   
   output$random_table <- renderTable({
     random_data()
@@ -132,4 +127,6 @@ shinyServer(function(input, output) {
   
   
 })
+
+
 
