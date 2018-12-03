@@ -5,7 +5,7 @@
 # Find out more about building applications with Shiny here:
 # 
 #    http://shiny.rstudio.com/
-#
+# hi
 
 library(shiny)
 source("server.R")
@@ -32,7 +32,6 @@ shinyUI(fluidPage(
                   tabPanel("Prices", plotOutput("priceHistogram") ),
                   tabPanel("Random", tableOutput("random_table")),
                   tabPanel("categories",  plotlyOutput("graph"))
-                  
       )
     )
   )
