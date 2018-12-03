@@ -127,15 +127,12 @@ shinyServer(function(input, output) {
     
   })
   
-<<<<<<< HEAD
-=======
+
   random_button <- eventReactive(input$action, {
     
   })
   
   
-  
->>>>>>> krishann-branch
 })
 
 
