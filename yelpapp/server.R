@@ -18,6 +18,7 @@ library(ggplot2)
 library(plotly)
 library(stringr)
 library(RColorBrewer)
+library(DT)
 ##library(ggmap)
 ##register_google(key = "yourkeyhere")
 
@@ -40,14 +41,14 @@ shinyServer(function(input, output) {
     top_ten_businesses <- get_business_list(input$cities) %>% 
       flatten() %>% 
       arrange(desc(rating)) %>% ##makes it by highest rating
-      head(businesses,n=10) %>% 
+      head(businesses,n=100) %>% 
       select(name, rating, review_count, price, location.address1) 
     colnames(top_ten_businesses) <- c("Name", "Rating", "Number of reviews", "Price Level", "Address")
     top_ten_businesses
   })
   
-  output$table <- renderTable({
-    table_data()
+  output$table <- renderDataTable({
+    DT::datatable(table_data(), escape = FALSE)
   })
   
   output$priceHistogram <- renderPlotly({

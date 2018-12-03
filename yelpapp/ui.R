@@ -31,7 +31,7 @@ shinyUI(fluidPage(
     # Show a plot of the generated distribution
     mainPanel(
       tabsetPanel(type = "tabs", ## 
-                  tabPanel("Top 10", tableOutput("table")),
+                  tabPanel("Top 100", dataTableOutput("table")),
                   tabPanel("Prices", plotlyOutput("priceHistogram") ),
                   
                   tabPanel("Random restaurant", fluid = TRUE,
