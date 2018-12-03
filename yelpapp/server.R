@@ -16,6 +16,7 @@ library(maps)
 library(ggplot2)
 library(plotly)
 library(stringr)
+library(RColorBrewer)
 ##library(ggmap)
 ##register_google(key = "yourkeyhere")
 
@@ -58,12 +59,12 @@ shinyServer(function(input, output) {
     businesses <- businesses %>% flatten() %>% mutate(price_level = nchar(price))
     businesses_no_na <- na.omit(businesses)
     
-    ggplot(businesses_no_na, aes(x=factor(businesses_no_na$price_level))) + 
+    ggplot(businesses_no_na, aes(x=factor(price_level), fill = price_level)) + 
       geom_bar(color = "grey", width=.8) + 
-      labs(x = "Price Level (Cost per person)", y = "Number of restaurants") +
+      labs(x = "Price Level (Cost per person)") +
       scale_x_discrete(labels = c("Less than $10", "$11-$30", "$31-$60", "More than $60")) + 
-      scale_fill_distiller(palette = "Spectral")
-    
+      theme_minimal() + 
+      guides(fill=FALSE)
   })
   
   random_data <- reactive({
