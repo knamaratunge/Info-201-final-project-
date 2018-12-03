@@ -1,4 +1,4 @@
-#
+#check update
 # This is the user-interface definition of a Shiny web application. You can
 # run the application by clicking 'Run App' above.
 #
@@ -30,7 +30,17 @@ shinyUI(fluidPage(
       tabsetPanel(type = "tabs",
                   tabPanel("Top 10", tableOutput("table")),
                   tabPanel("Prices", plotOutput("priceHistogram") ),
-                  tabPanel("Random", tableOutput("random_table")),
+                  
+                  tabPanel("Random", fluid = TRUE,
+                           sidebarLayout(
+                             sidebarPanel(actionButton("action", label = "Refresh")),
+                             mainPanel(fluidRow(tableOutput("random_table")
+                             )
+                             )
+                           )
+                  ), 
+            
+                  
                   tabPanel("categories",  plotlyOutput("graph"))
       )
     )
