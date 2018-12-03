@@ -8,13 +8,16 @@
 # hi
 
 library(shiny)
+library(shinyWidgets)
 source("server.R")
+
 
 # Define UI for application that draws a histogram
 shinyUI(fluidPage(
   
   # Application title
   titlePanel("Yelp App"),
+  setBackgroundImage(src = "https://peakfitnessmeals.com/wp-content/uploads/2017/04/bigstock-Healthy-food-background-69442900.jpg"),
   
   # Sidebar with a slider input for number of bins 
   sidebarLayout(
@@ -27,11 +30,11 @@ shinyUI(fluidPage(
     
     # Show a plot of the generated distribution
     mainPanel(
-      tabsetPanel(type = "tabs",
+      tabsetPanel(type = "tabs", ## 
                   tabPanel("Top 10", tableOutput("table")),
                   tabPanel("Prices", plotlyOutput("priceHistogram") ),
                   
-                  tabPanel("Random", fluid = TRUE,
+                  tabPanel("Random restaurant", fluid = TRUE,
                            sidebarLayout(
                              sidebarPanel(actionButton("action", label = "Refresh")),
                              mainPanel(fluidRow(tableOutput("random_table")
@@ -41,7 +44,7 @@ shinyUI(fluidPage(
                   ), 
             
                   
-                  tabPanel("categories",  plotlyOutput("graph"))
+                  tabPanel("Restaurant types",  plotlyOutput("graph"))
       )
     )
   )

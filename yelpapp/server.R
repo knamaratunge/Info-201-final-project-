@@ -66,6 +66,7 @@ shinyServer(function(input, output) {
     plotly_histogram <- ggplotly(histogram, tooltip = c("count"))
   })
   
+  ## add restaurant image
   random_data <- reactive({
     businesses <- get_business_list(input$cities)
     businesses <- flatten(businesses)
@@ -90,8 +91,9 @@ shinyServer(function(input, output) {
       )
   })
   
+  ## remove other category maybe, just do top 15 categories?
   output$graph <- renderPlotly({
-    businesses <- get_business_list(input$cities)
+    businesses <- get_business_list(input$cities) 
     categories <- select(businesses, categories)
     categories <- unnest(categories)
     summary <- group_by(categories, title) %>% 
