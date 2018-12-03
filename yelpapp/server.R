@@ -14,32 +14,22 @@ library(httr)
 library(jsonlite)
 library(maps)
 library(ggplot2)
-library(ggmap)
-
-register_google(key = "yourkeyhere")
+library(plotly)
+library(stringr)
+##library(ggmap)
+##register_google(key = "yourkeyhere")
 
 yelp_key <- "WIZ9vy0AqeqYf_pxMOmBFcSLnhhF4iZmgdlSdK2E3FOM7Zb8X3naitCp58p1pZIGypOIhi1Tdv020jQGNxHsmgv7D1I1cu3h_7cZkbvDqGGN3V7QZ3mSd4cTCXf8W3Yx"
 id <- "e6EqQUv9rODp67CGhfDoBg"
 
 get_business_list <-function(city_name) {
-  params <- list(  location = city_name, limit = 50)
+  params <- list( term = "food", location = city_name, limit = 50)
   response <- GET("https://api.yelp.com/v3/businesses/search", 
                   add_headers('Authorization' = paste("Bearer", yelp_key)), 
                   query = params)
   content <- content(response, 'text')
   data <- fromJSON(content)
   return(data$businesses)
-}
-
-get_business_details <-function(id) {
-  ##params <- list( id = id)
-  response <- GET(paste0("https://api.yelp.com/v3/businesses/", id), 
-                  add_headers('Authorization' = paste("Bearer", yelp_key))) 
-                  ##query = params)
-  content <- content(response, 'text')
-  data <- fromJSON(content)
-  details <- data.frame(matrix(unlist(data)))
-  return(details)
 }
 
 ##top 5 most populated cityz
@@ -49,12 +39,8 @@ get_business_details <-function(id) {
 ##names(cities) <- cities
 
 
-
-
-# Define server logic required to draw a histogram
 shinyServer(function(input, output) {
    
-  
   table_data <- reactive({
     businesses <- get_business_list(input$cities)
     top_ten <- head(businesses,n=10)
@@ -88,16 +74,54 @@ shinyServer(function(input, output) {
   })
   
   random_data <- reactive({
-    random_num <- sample(1:50,1,replace=T)
     businesses <- get_business_list(input$cities)
-    id <- businesses[random_num, 1]
-    details <- get_business_details(id)
-    ##details <- flatten(details)
-    
-  })
+    businesses <- flatten(businesses)
+    ran_table <- select(businesses, name, review_count, rating, price, location.address1, display_phone)
+    sample <- (sample_n(ran_table, size = 1, replace = TRUE))
+    column_data <- data.frame("Info" = c(sample[1,1], sample[1,2], sample[1,3], sample[1,4], sample[1,5], sample[1,6]))
+    column_category <- data.frame("Business"= c("name:", "count:", "rating:", "price:", "location:", "phone:"))
+    final_data <- cbind(column_category, column_data) 
+    return(final_data)  
+  }) 
   
   output$random_table <- renderTable({
     random_data()
+  })
+  
+  output$picture <- renderText({
+    ran <- random_data()
+      c(
+        '<img src="',ran[4,1] ,
+        '">'
+      )
+  })
+  
+  output$graph <- renderPlotly({
+    businesses <- get_business_list(input$cities)
+    categories <- select(businesses, categories)
+    categories <- unnest(categories)
+    summary <- group_by(categories, title) %>% 
+       summarise( n=n())
+    top_categories <- arrange(summary, desc(n)) %>% slice(1:15)  
+    total <- sum(top_categories$n)
+    top_categories <- top_categories %>% mutate(percent = round((n / total) * 100, 2))
+    ##colors <- c('rgb(102,194,165)', 'rgb(252,141,98)', 'rgb(141,160,203)', 'rgb(231,138,195)', 'rgb(166,216,84)', 'rgb(255,217,47)', 'rgb(229,196,148)')
+    graph <- plot_ly(top_categories, labels = ~title, values = ~percent, type = "pie",
+            marker = list(colors = colors,
+                          line = list(color = '#FFFFFF', width = 1))) %>% 
+      layout(title = "title",
+             xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
+             yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
+
+    
+    # graph <- 
+    #   ggplot() +
+    #       geom_bar(data = top_categories, mapping = aes(x = title, y = n , fill = n ))
+    # bp <- ggplot(categories, aes(x="", y=title, fill=title))+
+    #   geom_bar(width = 1, stat = "identity")
+    # pie <- bp + coord_polar("x", start=0)
+    return(graph)
+    
   })
   
   
