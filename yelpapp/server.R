@@ -6,7 +6,7 @@
 # 
 #    http://shiny.rstudio.com/
 #
-## our app
+## our yelp app
 
 library(shiny)
 library(tidyr)
