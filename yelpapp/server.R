@@ -19,6 +19,8 @@ library(plotly)
 library(stringr)
 library(RColorBrewer)
 library(DT)
+
+
 ##library(ggmap)
 ##register_google(key = "yourkeyhere")
 
@@ -133,6 +135,9 @@ shinyServer(function(input, output) {
     
   })
   
+  output$project_description <- renderText({
+    description
+  })
   
 })
 

@@ -9,7 +9,7 @@
 
 library(shiny)
 library(shinyWidgets)
-source("server.R")
+source("server.R") ##maybe unnecessary 
 
 
 # Define UI for application that draws a histogram
@@ -21,7 +21,8 @@ shinyUI(fluidPage(
   
   navbarPage("Welcome!", 
     tabPanel( "Project Description",
-       textOutput("project_description")
+       includeMarkdown("project_description.md")
+       
     # Sidebar with a slider input for number of bins 
     ),
     tabPanel("Widgets",
