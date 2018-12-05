@@ -9,7 +9,7 @@
 
 library(shiny)
 library(shinyWidgets)
-source("server.R") ##maybe unnecessary 
+source("server.R") 
 
 
 # Define UI for application that draws a histogram
