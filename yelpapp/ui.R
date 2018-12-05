@@ -1,5 +1,6 @@
 library(shiny)
 library(shinyWidgets)
+source("server.R")
 
 # Defines user-interface for a Shiny web application displaying Yelp 
 # information and visualizations. 

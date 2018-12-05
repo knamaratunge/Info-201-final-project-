@@ -12,6 +12,7 @@ library(plotly)
 library(stringr)
 library(RColorBrewer)
 library(DT)
+library(markdown)
 
 ## Stores the public API key for Yelp's Fusion API. 
 yelp_key <- "WIZ9vy0AqeqYf_pxMOmBFcSLnhhF4iZmgdlSdK2E3FOM7Zb8X3naitCp58p1pZIGypOIhi1Tdv020jQGNxHsmgv7D1I1cu3h_7cZkbvDqGGN3V7QZ3mSd4cTCXf8W3Yx"
