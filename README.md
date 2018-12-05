@@ -1,4 +1,4 @@
-# Info-201-final-project-
+# Info 201 Final Project
 
 ### Project Overview
 For our project, we used the **Yelp Fusion API** to create informative and interactive data visualizations. Our group finds Yelp to be immensely helpful, so we strived to explore ways to communicate different pieces of information that the app offers.
