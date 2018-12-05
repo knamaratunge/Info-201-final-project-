@@ -1,22 +1,12 @@
-#check update
-# This is the user-interface definition of a Shiny web application. You can
-# run the application by clicking 'Run App' above.
-#
-# Find out more about building applications with Shiny here:
-# 
-#    http://shiny.rstudio.com/
-#
-
 library(shiny)
 library(shinyWidgets)
-source("server.R") ##maybe unnecessary 
 
-
-# Define UI for application that draws a histogram
+# Defines user-interface for a Shiny web application displaying Yelp 
+# information and visualizations. 
 shinyUI(fluidPage(
   
   # Application title
-  titlePanel("Yelp App"),
+  titlePanel("Team Noodle Final Project"),
   setBackgroundImage(src = "https://peakfitnessmeals.com/wp-content/uploads/2017/04/bigstock-Healthy-food-background-69442900.jpg"),
   
   navbarPage("Welcome!", 
@@ -38,7 +28,10 @@ shinyUI(fluidPage(
         mainPanel(
           tabsetPanel(type = "tabs", ## 
                       tabPanel("Top 50", dataTableOutput("table")),
-                      tabPanel("Prices", plotlyOutput("priceHistogram") ),
+                      
+                      tabPanel("Prices", 
+                               fluidPage(textOutput("topPrice"), 
+                                         plotlyOutput("priceHistogram"))),
                       
                       tabPanel("Random restaurant", fluid = TRUE,
                                sidebarLayout(
@@ -48,14 +41,11 @@ shinyUI(fluidPage(
                                  )
                                )
                       ), 
-                
                       
                       tabPanel("Restaurant types",  plotlyOutput("graph"))
           )
         )
       ))
+    )
   )
-  )
-) 
-
-
+)

@@ -1,12 +1,5 @@
-#
-# This is the server logic of a Shiny web application. You can run the 
-# application by clicking 'Run App' above.
-#
-# Find out more about building applications with Shiny here:
-# 
-#    http://shiny.rstudio.com/
-#
-## our yelp app
+# This defines the server logic of our Shiny web application displaying Yelp 
+# information and visualizations. 
 
 library(shiny)
 library(tidyr)
@@ -20,13 +13,12 @@ library(stringr)
 library(RColorBrewer)
 library(DT)
 
-
-##library(ggmap)
-##register_google(key = "yourkeyhere")
-
+## Stores the public API key for Yelp's Fusion API. 
 yelp_key <- "WIZ9vy0AqeqYf_pxMOmBFcSLnhhF4iZmgdlSdK2E3FOM7Zb8X3naitCp58p1pZIGypOIhi1Tdv020jQGNxHsmgv7D1I1cu3h_7cZkbvDqGGN3V7QZ3mSd4cTCXf8W3Yx"
 id <- "e6EqQUv9rODp67CGhfDoBg"
 
+## Given the location that the user inputs, returns data
+## containing business details for restaurants nearest that location.
 get_business_list <-function(city_name) {
   params <- list( term = "food", location = city_name, limit = 50)
   response <- GET("https://api.yelp.com/v3/businesses/search", 
@@ -39,20 +31,26 @@ get_business_list <-function(city_name) {
 
 shinyServer(function(input, output) {
    
+  ## Given the location that the user inputs, returns restaurant details about the 50 
+  ## top rated restaurants nearest that location.
   table_data <- reactive({
-    top_ten_businesses <- get_business_list(input$cities) %>% 
+    top_fifty_businesses <- get_business_list(input$cities) %>% 
       flatten() %>% 
-      arrange(desc(rating)) %>% ##makes it by highest rating
-      head(businesses,n=100) %>% 
+      arrange(desc(rating)) %>%  ## sorts restaurants by rating, descending
+      head(businesses,n=50) %>% 
       select(name, rating, review_count, price, location.address1) 
-    colnames(top_ten_businesses) <- c("Name", "Rating", "Number of reviews", "Price Level", "Address")
-    top_ten_businesses
+    colnames(top_fifty_businesses) <- c("Name", "Rating", "Number of reviews", 
+                                        "Price Level", "Address")
+    top_fifty_businesses
   })
   
+  ## Creates data table containing restaurant information.
   output$table <- renderDataTable({
     DT::datatable(table_data(), escape = FALSE)
   })
   
+  ## Outputs a bar chart of restaurant price levels of the 50 top-rated
+  ## restaurants in the user's inputted location.
   output$priceHistogram <- renderPlotly({
     businesses <- get_business_list(input$cities)
     businesses <- businesses %>% flatten() %>% mutate(price_level = nchar(price))
@@ -61,7 +59,7 @@ shinyServer(function(input, output) {
     histogram <- 
       ggplot(businesses_no_na, aes(x=factor(price_level), fill = price_level)) + 
       geom_bar(color = "grey", width=.8) + 
-      labs(x = "Price Level (Cost per person)") +
+      labs(x = "Price Level (Cost per person)", title = "Restaurant Prices Near You") +
       scale_x_discrete(labels = c("Less than $10", "$11-$30", "$31-$60", "More than $60")) + 
       theme_minimal() + 
       guides(fill=FALSE)
@@ -69,7 +67,8 @@ shinyServer(function(input, output) {
     plotly_histogram <- ggplotly(histogram, tooltip = c("count"))
   })
   
-  ## add restaurant image
+  ## Returns business information for a random restaurant in the user's 
+  ## chosen location.
   random_data <- reactive({
     businesses <- get_business_list(input$cities)
     businesses <- flatten(businesses)
@@ -82,64 +81,64 @@ shinyServer(function(input, output) {
     return(final_data)  
   }) 
   
-  
+  ## Creates a table for a random restaurant in the uesr's chosen location.
    output$random_table <- renderTable({
-     ##random_button()
      random_data()
-     
    })
-  
-  output$picture <- renderText({
-    ran <- random_data()
-      c(
-        '<img src="',ran[4,1] ,
-        '">'
-      )
-  })
-  
-  ## remove other category maybe, just do top 15 categories?
+
+  ## Outputs a pi chart of the restaurant categories for the top 50 restaurants
+  ## in the the user's chosen location.
+  ## Restaurant categories that match only one restaurant in the location are
+  ## combined into the "Other" category for added chart clarity. 
   output$graph <- renderPlotly({
     businesses <- get_business_list(input$cities) 
-    categories <- select(businesses, categories)
-    categories <- unnest(categories)
+    categories <- select(businesses, categories) %>% unnest()
     summary <- group_by(categories, title) %>% 
-       summarise( n=n())
+       summarise(n=n())
     categorie_table <- arrange(summary, desc(n)) 
     top_categories <- filter(categorie_table, n > 1) 
-    other_categories <- filter(categorie_table, n <= 1)
+    other_categories <- filter(categorie_table, n <= 1) ## moves categories that match only 
+                                                        ## restaurant into an "Other" category
     total <- sum(top_categories$n) + nrow(other_categories)
     new_row <-data.frame("other", nrow(other_categories))
-    names(new_row)<-c("title","n")
-    top_categories <- rbind(top_categories, new_row)
-    top_categories <- top_categories %>% mutate(percent = round((n / total) * 100, 2))
-    ##colors <- c('rgb(102,194,165)', 'rgb(252,141,98)', 'rgb(141,160,203)', 'rgb(231,138,195)', 'rgb(166,216,84)', 'rgb(255,217,47)', 'rgb(229,196,148)')
+    names(new_row) <- c("title","n")
+    top_categories <- rbind(top_categories, new_row) %>% 
+      mutate(percent = round((n / total) * 100, 2))
+    
     graph <- plot_ly(top_categories, labels = ~title, values = ~percent, type = "pie",
             marker = list(colors = colors,
                           line = list(color = '#FFFFFF', width = 1))) %>% 
-      layout(title = "title",
+      layout(title = "Types of Restaurants Near You",
              xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
              yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
-
-    # graph <- 
-    #   ggplot() +
-    #       geom_bar(data = top_categories, mapping = aes(x = title, y = n , fill = n ))
-    # bp <- ggplot(categories, aes(x="", y=title, fill=title))+
-    #   geom_bar(width = 1, stat = "identity")
-    # pie <- bp + coord_polar("x", start=0)
-    return(graph)
     
+    return(graph)
   })
-  
 
+  ## Creates a button for the user to generate new random restaurant data.
   random_button <- eventReactive(input$action, {
     
   })
   
-  output$project_description <- renderText({
-    description
+  ## Prints out a sentence stating the top price level based upon the
+  ## location that the user selects. 
+  output$topPrice <- renderText({
+    subset_data <- get_business_list(input$cities) %>%
+      flatten() %>% 
+      mutate(price_level = nchar(price)) %>%
+      na.omit()
+    most_common_price_index <- subset_data %>% 
+      summarise(price_level = getmode(price_level)) 
+    labels = c("Less than $10", "$11-$30", "$31-$60", "More than $60")
+
+    paste0("It looks like the most common price range in this area is: ", 
+           labels[most_common_price_index$price_level], "!")
   })
   
+  ## Given a column of a data frame, returns the mode value.   
+  getmode <- function(v) {
+    uniqv <- unique(v)
+    uniqv[which.max(tabulate(match(v, uniqv)))]
+  }
+  
 })
-
-
-
